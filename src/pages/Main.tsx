@@ -1,20 +1,61 @@
-import NavBar from "../components/NavBar";
 import styled from "styled-components";
 import tw from "twin.macro";
 import Banner from "../components/Main/Banner";
 import TagLine from "../components/Main/TagLine";
 import MentoringSection from "../components/Main/MentoringSection";
 import DonationSection from "../components/Main/DonationSection";
-import Footer from "../components/Common/Footer";
 import ChallengeSection from "../components/Main/ChallengeSection";
 import InformationSection from "../components/Main/InformationSection";
 import Button from "../components/Common/Button";
 import Bird from "../assets/images/bird.png";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import DefaultLayout from "../components/Common/DefaultLayout";
+import useAuthStore from "../storage/useAuthStore";
+import { getUserInfo } from "../apis/user";
 
 function Main() {
+    // redirection 주소로 부터 accessToken을 받아와서 localStorage에 저장
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            const query = new URLSearchParams(location.search);
+            let accessToken = useAuthStore.getState().accessToken;
+
+            if (!accessToken) {
+                const token = query.get("accessToken");
+                if (token) {
+                    accessToken = token;
+                }
+            }
+
+            if (
+                accessToken &&
+                useAuthStore.getState().userData.id === undefined
+            ) {
+                try {
+                    const res = await getUserInfo(accessToken);
+                    if (res.success) {
+                        useAuthStore.setState({
+                            isLoggedIn: true,
+                            userData: res.data,
+                            accessToken: accessToken,
+                        });
+                        navigate("/"); // 사용자 정보 설정 후 홈으로 리디렉션
+                    }
+                } catch (error) {
+                    console.error("사용자 정보 가져오기 오류:", error);
+                }
+            }
+        };
+
+        fetchUserInfo();
+    }, [location.search, navigate]);
+
     return (
-        <MainContainer>
-            <NavBar />
+        <DefaultLayout>
             <TagLine />
             <Banner />
             <ContentsContainer>
@@ -28,8 +69,7 @@ function Main() {
                     <img src={Bird} alt="bird" />
                 </FledgeContainer>
             </ContentsContainer>
-            <Footer />
-        </MainContainer>
+        </DefaultLayout>
     );
 }
 
@@ -51,22 +91,12 @@ const Title = styled.span`
     `}
 `;
 
-const MainContainer = styled.div`
-    ${tw`
-        flex
-        flex-col
-        items-center
-        font-sans
-        bg-background
-    `}
-`;
-
 const ContentsContainer = styled.div`
     ${tw`
         flex
         flex-col
         items-center
-        w-[1280px]
+
         mt-[142px]
         gap-[288px]
     `}

@@ -4,12 +4,18 @@ import { ReactComponent as KakaoSignUp } from "../../../assets/images/kakao_sign
 import { ReactComponent as KaKaoSignIn } from "../../../assets/images/kakao_sign_in.svg";
 import { useState } from "react";
 
-const LoginContainer = () => {
+interface LoginButtonProps {
+    handleSign: () => void;
+}
+
+const LoginButton = ({ handleSign }: LoginButtonProps) => {
     const [isSignUpHovered, setIsSignUpHovered] = useState(false);
     const [isSignInHovered, setIsSignInHovered] = useState(false);
+
     return (
         <MenuContainer>
             <SocialContainer
+                onClick={() => handleSign()}
                 onMouseEnter={() => setIsSignUpHovered(true)}
                 onMouseLeave={() => setIsSignUpHovered(false)}
             >
@@ -21,6 +27,7 @@ const LoginContainer = () => {
                 )}
             </SocialContainer>
             <SocialContainer
+                onClick={() => handleSign()}
                 onMouseEnter={() => setIsSignInHovered(true)}
                 onMouseLeave={() => setIsSignInHovered(false)}
             >
@@ -35,7 +42,7 @@ const LoginContainer = () => {
     );
 };
 
-export default LoginContainer;
+export default LoginButton;
 
 const MenuContainer = styled.div`
     ${tw`

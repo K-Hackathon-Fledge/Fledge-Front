@@ -1,35 +1,26 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import tw from "twin.macro";
+import { categories } from "../../@types/sponsor-category";
+import useFilterStore from "../../storage/useFilterStore";
 
-type Category = {
-  id: string;
-  label: string;
-};
 function Filter() {
-  const categories: Category[] = [
-    { id: "necessities", label: "생활필수품" },
-    { id: "food", label: "식품" },
-    { id: "electronics", label: "가전제품" },
-    { id: "education", label: "교육비/교재비" },
-    { id: "medical", label: "의료비" },
-    { id: "legal", label: "법률구조비" },
-    { id: "others", label: "기타" },
-  ];
   // 체크박스 상태를 저장할 타입 정의
-  const [checkedCategories, setCheckedCategories] = useState<
-    Record<string, boolean>
-  >({});
+  const { checkedCategories, setCheckedCategories, resetFilters } =
+    useFilterStore();
 
   const handleCheckboxChange = (id: string) => {
-    setCheckedCategories((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    if (checkedCategories.includes(id)) {
+      setCheckedCategories(
+        checkedCategories.filter((categoryId) => categoryId !== id)
+      );
+    } else {
+      setCheckedCategories([...checkedCategories, id]);
+    }
   };
 
   const handleReset = () => {
-    setCheckedCategories({});
+    resetFilters();
   };
   return (
     <Wrapper>
@@ -49,11 +40,11 @@ function Filter() {
                 id={category.id}
                 name="category"
                 value={category.id}
-                checked={checkedCategories[category.id] || false}
+                checked={checkedCategories.includes(category.id)}
                 onChange={() => handleCheckboxChange(category.id)}
               />
               <span className="checkmark">
-                {checkedCategories[category.id] && (
+                {checkedCategories.includes(category.id) && (
                   <span className="checkmark-v">✔</span>
                 )}
               </span>

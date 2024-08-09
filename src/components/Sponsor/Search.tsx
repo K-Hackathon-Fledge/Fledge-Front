@@ -1,12 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import tw from "twin.macro";
 import styled from "styled-components";
 import { ReactComponent as SearchIcon } from "../../assets/icons/search-icon.svg";
+import useFilterStore from "../../storage/useFilterStore";
 function Search() {
+  const { keyword, setKeyword } = useFilterStore((state) => ({
+    keyword: state.keyword,
+    setKeyword: state.setKeyword,
+  }));
+
   return (
     <Wrapper>
       <SearchIcon />
-      <input type="text" placeholder="후원글 키워드 검색"></input>
+      <input
+        type="text"
+        placeholder="후원글 키워드 검색"
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+      ></input>
     </Wrapper>
   );
 }

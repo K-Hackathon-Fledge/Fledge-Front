@@ -1,9 +1,11 @@
 import React, { ChangeEvent, useState } from "react";
 import styled from "styled-components";
 import tw from "twin.macro";
+import useFilterStore from "../../storage/useFilterStore";
+import { sorts } from "../../@types/sponsor-category";
 
 function SortOption() {
-  const [status, setStatus] = useState("");
+  const { status, setStatus } = useFilterStore();
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setStatus(event.target.value);
@@ -12,8 +14,9 @@ function SortOption() {
   return (
     <>
       <Select value={status} onChange={handleChange}>
-        <option value="ongoing">진행 중</option>
-        <option value="ended">기간 종료</option>
+        {sorts.map((item, index) => (
+          <option value={item.id}>{item.label}</option>
+        ))}
       </Select>
     </>
   );

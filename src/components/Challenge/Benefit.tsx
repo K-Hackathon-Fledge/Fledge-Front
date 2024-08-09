@@ -9,7 +9,7 @@ export interface BenefitProps {
 const Benefit = ({ title, price }: BenefitProps) => {
     return (
         <div>
-            <span>{title}</span>
+            <span>{title}, </span>
             <BenefitPrice>{price}</BenefitPrice> 지원
         </div>
     );

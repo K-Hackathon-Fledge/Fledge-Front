@@ -1,68 +1,60 @@
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
 import styled from "styled-components";
 import BannerItem from "./BannerItem";
 import LeftArrowIcon from "../../assets/icons/left-arrow";
 import RightArrowIcon from "../../assets/icons/right-arrow";
+import { SponsorBannerData } from "../../@types/sponsor";
 
-function Slider() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+type SliderProps = {
+  totalPages: number;
+  currentPage: number;
+  items: SponsorBannerData[];
+  setCurrentPage: (page: number) => void;
+};
+function Slider({
+  totalPages,
+  currentPage,
+  items,
+  setCurrentPage,
+}: SliderProps) {
+  const [translateX, setTranslateX] = useState(0);
+  const handleNext = () => {
+    if (totalPages > currentPage + 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
-  const DummyData = [
-    { remained: 4, detail: "핸드폰 수리비가 부족해요.", progressNum: 80 },
-    { remained: 3, detail: "핸드폰 수리비가 부족해요.", progressNum: 50 },
-    { remained: 2, detail: "핸드폰 수리비가 부족해요.", progressNum: 10 },
-    { remained: 1, detail: "핸드폰 수리비가 부족해요.", progressNum: 40 },
-    { remained: 3, detail: "핸드폰 수리비가 부족해요.", progressNum: 50 },
-    { remained: 2, detail: "핸드폰 수리비가 부족해요.", progressNum: 10 },
-    { remained: 1, detail: "핸드폰 수리비가 부족해요.", progressNum: 40 },
-    { remained: 3, detail: "핸드폰 수리비가 부족해요.", progressNum: 50 },
-    { remained: 3, detail: "핸드폰 수리비가 부족해요.", progressNum: 50 },
-    { remained: 2, detail: "핸드폰 수리비가 부족해요.", progressNum: 10 },
-    { remained: 1, detail: "핸드폰 수리비가 부족해요.", progressNum: 40 },
-    { remained: 3, detail: "핸드폰 수리비가 부족해요.", progressNum: 50 },
-  ];
+  const handlePrev = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
-  const bannerCount = DummyData.length; // 배너의 총 개수
-  const itemsToShow = 4; // 한 번에 보여줄 배너 수
-
-  // 전체 아이템을 페이지 단위로 나누기
-  const totalPages = Math.ceil(bannerCount / itemsToShow);
-  const handlePrevClick = useCallback(() => {
-    setCurrentIndex((prevIndex) => Math.max(prevIndex - itemsToShow, 0));
-  }, []);
-
-  const handleNextClick = useCallback(() => {
-    setCurrentIndex((prevIndex) =>
-      Math.min(prevIndex + itemsToShow, (totalPages - 1) * itemsToShow)
-    );
-  }, [totalPages]);
+  useEffect(() => {
+    setTranslateX(-currentPage * 100); // 페이지 변경 시 위치 업데이트
+  }, [currentPage]);
 
   return (
     <Wrapper>
-      <Button onClick={handlePrevClick} disabled={currentIndex === 0}>
+      <Button onClick={handlePrev} disabled={currentPage === 0}>
         <LeftArrowIcon width={25} height={51} />
       </Button>
       <SliderContainer>
-        <ItemBox
-          style={{
-            transform: `translateX(-${(300 + 20) * currentIndex}px)`,
-          }}
-        >
-          {DummyData.map((data, index) => (
+        <ItemBox translateX={translateX}>
+          {items.map((data: SponsorBannerData, index: number) => (
             <BannerItem
               key={index}
-              remained={data.remained}
-              progressNum={data.progressNum}
-              detail={data.detail}
+              supportId={data.supportId}
+              title={data.title}
+              leftDays={data.leftDays}
+              supportPostImageUrl={data.supportPostImageUrl}
+              supportRecord={data.supportRecord}
             />
           ))}
         </ItemBox>
       </SliderContainer>
-      <Button
-        onClick={handleNextClick}
-        disabled={currentIndex >= (totalPages - 1) * itemsToShow}
-      >
+      <Button onClick={handleNext} disabled={currentPage === totalPages - 1}>
         <RightArrowIcon width={25} height={51} />
       </Button>
     </Wrapper>
@@ -79,8 +71,10 @@ const SliderContainer = styled.div`
   ${tw`w-[1280px] overflow-hidden`}
 `;
 
-const ItemBox = styled.div`
-  ${tw`flex items-center transition-transform duration-300`}
+const ItemBox = styled.div<{ translateX: number }>`
+  ${tw`flex items-center `}
+  transform: translateX(${(props) => props.translateX}%);
+  transition: transform 0.5s ease-in-out;
   gap: 20px;
 `;
 

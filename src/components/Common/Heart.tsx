@@ -1,16 +1,20 @@
 import styled from "styled-components";
 import tw from "twin.macro";
-import HeartImg from "../../assets/images/heart.png";
+import LikeIcon from "../../assets/icons/like-icon";
 
 interface HeartProps {
     heartCount: number;
+    fill: boolean;
+    onClick: () => void;
 }
 
-const Heart = ({ heartCount }: HeartProps) => {
+const Heart = ({ heartCount, fill = false, onClick }: HeartProps) => {
     return (
-        <HeartContainer>
-            <img src={HeartImg} alt="heart" />
-            <HeartCount>{heartCount}</HeartCount>
+        <HeartContainer onClick={onClick}>
+            <LikeIcon fill={fill} />
+            <HeartCount onClick={(e) => e.stopPropagation()}>
+                {heartCount}
+            </HeartCount>
         </HeartContainer>
     );
 };
@@ -24,6 +28,11 @@ const HeartContainer = styled.div`
         items-center
         justify-end
     `}
+    svg {
+        ${tw`
+            cursor-pointer
+        `}
+    }
 `;
 
 const HeartCount = styled.span`
