@@ -15,66 +15,71 @@ import useAuthStore from "../storage/useAuthStore";
 import { getUserInfo } from "../apis/user";
 
 function Main() {
-    // redirection 주소로 부터 accessToken을 받아와서 localStorage에 저장
-    const location = useLocation();
-    const navigate = useNavigate();
+  // redirection 주소로 부터 accessToken을 받아와서 localStorage에 저장
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUserInfo = async () => {
-            const query = new URLSearchParams(location.search);
-            let accessToken = useAuthStore.getState().accessToken;
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const query = new URLSearchParams(location.search);
+      let accessToken = useAuthStore.getState().accessToken;
+      let refreshToken = useAuthStore.getState().refreshToken;
+      if (!accessToken || !refreshToken) {
+        const token = query.get("accessToken");
+        const refresh = query.get("refreshToken");
 
-            if (!accessToken) {
-                const token = query.get("accessToken");
-                if (token) {
-                    accessToken = token;
-                }
-            }
+        if (token) {
+          accessToken = token;
+          useAuthStore.setState({ accessToken: token });
+        }
 
-            if (
-                accessToken &&
-                useAuthStore.getState().userData.id === undefined
-            ) {
-                try {
-                    const res = await getUserInfo(accessToken);
-                    if (res.success) {
-                        useAuthStore.setState({
-                            isLoggedIn: true,
-                            userData: res.data,
-                            accessToken: accessToken,
-                        });
-                        navigate("/"); // 사용자 정보 설정 후 홈으로 리디렉션
-                    }
-                } catch (error) {
-                    console.error("사용자 정보 가져오기 오류:", error);
-                }
-            }
-        };
+        if (refresh) {
+          refreshToken = refresh;
+          useAuthStore.setState({ refreshToken: refresh });
+        }
+      }
 
-        fetchUserInfo();
-    }, [location.search, navigate]);
+      if (accessToken && useAuthStore.getState().userData.id === undefined) {
+        try {
+          const res = await getUserInfo(accessToken);
+          if (res.success) {
+            useAuthStore.setState({
+              isLoggedIn: true,
+              userData: res.data,
+              accessToken: accessToken,
+            });
+            navigate("/"); // 사용자 정보 설정 후 홈으로 리디렉션
+          }
+        } catch (error) {
+          console.error("사용자 정보 가져오기 오류:", error);
+        }
+      }
+    };
 
-    return (
-        <DefaultLayout>
-            <TagLine />
-            <Banner />
-            <ContentsContainer>
-                <DonationSection />
-                <ChallengeSection />
-                <MentoringSection />
-                <InformationSection />
-                <FledgeContainer>
-                    <Title>fledge 플리지에게 흥미가 생기셨나요?</Title>
-                    <Button title="fledge가 뭐에요?" />
-                    <img src={Bird} alt="bird" />
-                </FledgeContainer>
-            </ContentsContainer>
-        </DefaultLayout>
-    );
+    fetchUserInfo();
+  }, [location.search, navigate]);
+
+  return (
+    <DefaultLayout>
+      <TagLine />
+      <Banner />
+      <ContentsContainer>
+        <DonationSection />
+        <ChallengeSection />
+        <MentoringSection />
+        <InformationSection />
+        <FledgeContainer>
+          <Title>fledge 플리지에게 흥미가 생기셨나요?</Title>
+          <Button title="fledge가 뭐에요?" />
+          <img src={Bird} alt="bird" />
+        </FledgeContainer>
+      </ContentsContainer>
+    </DefaultLayout>
+  );
 }
 
 const FledgeContainer = styled.div`
-    ${tw`
+  ${tw`
         flex
         flex-col
         items-center
@@ -84,7 +89,7 @@ const FledgeContainer = styled.div`
 `;
 
 const Title = styled.span`
-    ${tw`
+  ${tw`
         text-bold-64
         font-bold
         text-fontColor1
@@ -92,7 +97,7 @@ const Title = styled.span`
 `;
 
 const ContentsContainer = styled.div`
-    ${tw`
+  ${tw`
         flex
         flex-col
         items-center

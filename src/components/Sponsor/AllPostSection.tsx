@@ -37,10 +37,15 @@ function AllPostSection() {
   });
 
   const handleUserPermission = () => {
-    if (userData.role === "USER") {
-      alert("자립준비청년만 이용 가능한 기능입니다.");
+    if (Object.keys(userData).length !== 0) {
+      if (userData.role === "USER") {
+        alert("자립준비청년만 이용 가능한 기능입니다.");
+      } else {
+        navigate("/sponsor-register");
+        window.scrollTo(0, 0);
+      }
     } else {
-      navigate("/sponsor-register");
+      alert("로그인 후 이용 가능한 기능입니다.");
     }
   };
   console.log(PostData);
