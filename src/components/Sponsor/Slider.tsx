@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import tw from "twin.macro";
 import styled from "styled-components";
 import BannerItem from "./BannerItem";
@@ -7,41 +7,30 @@ import RightArrowIcon from "../../assets/icons/right-arrow";
 import { SponsorBannerData } from "../../@types/sponsor";
 
 type SliderProps = {
-  totalPages: number;
-  currentPage: number;
   items: SponsorBannerData[];
-  setCurrentPage: (page: number) => void;
 };
-function Slider({
-  totalPages,
-  currentPage,
-  items,
-  setCurrentPage,
-}: SliderProps) {
-  const [translateX, setTranslateX] = useState(0);
-  const handleNext = () => {
-    if (totalPages > currentPage + 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+function Slider({ items }: SliderProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsToShow = 4; // 한 번에 보여줄 배너 수
 
-  const handlePrev = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // 전체 아이템을 페이지 단위로 나누기
+  const totalPages = Math.ceil(items.length / itemsToShow);
 
-  useEffect(() => {
-    setTranslateX(-currentPage * 100); // 페이지 변경 시 위치 업데이트
-  }, [currentPage]);
+  const handlePrevClick = useCallback(() => {
+    setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  }, []);
+
+  const handleNextClick = useCallback(() => {
+    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, totalPages - 1));
+  }, [totalPages]);
 
   return (
     <Wrapper>
-      <Button onClick={handlePrev} disabled={currentPage === 0}>
+      <Button onClick={handlePrevClick} disabled={currentIndex === 0}>
         <LeftArrowIcon width={25} height={51} />
       </Button>
       <SliderContainer>
-        <ItemBox translateX={translateX}>
+        <ItemBox translateX={-currentIndex * 100}>
           {items.map((data: SponsorBannerData, index: number) => (
             <BannerItem
               key={index}
@@ -54,7 +43,10 @@ function Slider({
           ))}
         </ItemBox>
       </SliderContainer>
-      <Button onClick={handleNext} disabled={currentPage === totalPages - 1}>
+      <Button
+        onClick={handleNextClick}
+        disabled={currentIndex >= totalPages - 1}
+      >
         <RightArrowIcon width={25} height={51} />
       </Button>
     </Wrapper>
@@ -72,9 +64,8 @@ const SliderContainer = styled.div`
 `;
 
 const ItemBox = styled.div<{ translateX: number }>`
-  ${tw`flex items-center `}
+  ${tw`flex items-center transition-transform duration-300 ease-in-out`}
   transform: translateX(${(props) => props.translateX}%);
-  transition: transform 0.5s ease-in-out;
   gap: 20px;
 `;
 

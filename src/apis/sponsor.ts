@@ -139,15 +139,10 @@ export const getPagingPost = async (
   }
 };
 
-export const getDeadlinePost = async (page: number) => {
+export const getDeadlinePost = async () => {
   try {
-    const res = await axios.get(
-      `/api/v1/public/supports/deadline?paging=${page}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+    const res = await axiosInstance.get(
+      `/api/v1/public/supports/deadline-approaching`
     );
     return res.data.data;
   } catch (error) {
@@ -194,6 +189,27 @@ export const getCanaryInfo = async (memberId: number) => {
   try {
     const res = await axiosInstance.get(`/api/v1/canary/${memberId}/supports`);
     return res.data.data;
+  } catch (error) {
+    console.log(error);
+    if (axios.isAxiosError<CommonError>(error) && error.response) {
+      const errorCode = error.response.data.errorCode;
+      const message = error.response.data.message;
+      console.log(`${errorCode}: ${message}`);
+    }
+  }
+};
+
+export const deleteSupportPost = async (
+  supportId: string,
+  accesstoken: string
+) => {
+  try {
+    const res = await axiosInstance.delete(`/api/v1/supports/${supportId}`, {
+      headers: {
+        Authorization: `Bearer ${accesstoken}`,
+      },
+    });
+    return res.data;
   } catch (error) {
     console.log(error);
     if (axios.isAxiosError<CommonError>(error) && error.response) {

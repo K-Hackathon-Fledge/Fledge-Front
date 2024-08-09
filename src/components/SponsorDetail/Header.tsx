@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import tw from "twin.macro";
 
@@ -6,36 +6,47 @@ import DefaultProfile from "../../assets/images/profile.png";
 import { useQuery } from "@tanstack/react-query";
 import { getCanaryInfo } from "../../apis/sponsor";
 import useAuthStore from "../../storage/useAuthStore";
+import DeleteModal from "./DeleteModal";
 type HeaderProps = {
   memberId: number;
 };
 function Header({ memberId }: HeaderProps) {
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
   const currentUserId = useAuthStore((state) => state.userData.id);
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["getCanaryInfo"],
-    queryFn: () => getCanaryInfo(memberId),
-  });
+  // const { data, isLoading, error } = useQuery({
+  //   queryKey: ["getCanaryInfo"],
+  //   queryFn: () => getCanaryInfo(memberId),
+  // });
   return (
-    <Container>
-      <RowBox>
-        <img src={DefaultProfile} className="profile-img" alt="프로필 이미지" />
-        <ColBox className="ml-5">
-          <span className="nickname">카드값줘체리</span>
-          <RowBox>
-            <span className="bold-span">후원 인증률 100% </span>
-            <span className="medium-span"> 6/6 인증</span>
-          </RowBox>
-        </ColBox>
-      </RowBox>
-      {memberId !== currentUserId! ? (
-        <StyledBtn main>후원하기</StyledBtn>
-      ) : (
-        <RowBox className="w-[250px]">
-          <StyledBtn main={false}>수정하기</StyledBtn>
-          <StyledBtn main>삭제하기</StyledBtn>
+    <>
+      <Container>
+        <RowBox>
+          <img
+            src={DefaultProfile}
+            className="profile-img"
+            alt="프로필 이미지"
+          />
+          <ColBox className="ml-5">
+            <span className="nickname">카드값줘체리</span>
+            <RowBox>
+              <span className="bold-span">후원 인증률 100% </span>
+              <span className="medium-span"> 6/6 인증</span>
+            </RowBox>
+          </ColBox>
         </RowBox>
-      )}
-    </Container>
+        {memberId !== currentUserId! ? (
+          <StyledBtn main>후원하기</StyledBtn>
+        ) : (
+          <RowBox className="w-[250px]">
+            <StyledBtn main={false}>수정하기</StyledBtn>
+            <StyledBtn main onClick={() => setIsOpenDelete(!isOpenDelete)}>
+              삭제하기
+            </StyledBtn>
+          </RowBox>
+        )}
+      </Container>
+      {isOpenDelete && <DeleteModal onClose={() => setIsOpenDelete(false)} />}
+    </>
   );
 }
 

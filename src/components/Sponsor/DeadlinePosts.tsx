@@ -1,62 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { getDeadlinePost } from "../../apis/sponsor";
 import Slider from "./Slider";
-import { SponsorBannerData } from "../../@types/sponsor";
+
 import tw from "twin.macro";
 import styled from "styled-components";
 import NoBanner from "../../assets/images/no_banner.png";
 function DeadlinePosts() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [combinedPosts, setCombinedPosts] = useState<SponsorBannerData[]>([]);
-
   const {
     data: PostData,
-    isLoading: isLoadingCurrent,
+    isLoading,
     error,
   } = useQuery({
-    queryKey: ["getDeadlinePosts", currentPage],
-    queryFn: () => getDeadlinePost(currentPage),
+    queryKey: ["getDeadlinePosts"],
+    queryFn: () => getDeadlinePost(),
   });
-
-  const { data: previousPosts, isLoading: isLoadingPrevious } = useQuery({
-    queryKey: ["getDeadlinePosts", currentPage],
-    queryFn: () => getDeadlinePost(currentPage - 1),
-    enabled: currentPage > 0,
-  });
-
-  const { data: nextPosts, isLoading: isLoadingNext } = useQuery({
-    queryKey: ["getDeadlinePosts", currentPage],
-    queryFn: () => getDeadlinePost(currentPage + 1),
-    enabled: PostData && PostData.totalPages > currentPage,
-  });
-
-  useEffect(() => {
-    if (PostData || previousPosts || nextPosts) {
-      setCombinedPosts([
-        ...(previousPosts?.supportPosts || []),
-        ...(PostData?.supportPosts || []),
-        ...(nextPosts?.supportPosts || []),
-      ]);
-    }
-  }, [previousPosts, PostData, nextPosts]);
-
-  if (isLoadingCurrent || isLoadingPrevious || isLoadingNext) {
-    return <div>Loading...</div>; // 로딩 상태 표시
-  }
 
   if (error) {
     return <div>Error loading posts</div>; // 에러 상태 표시
   }
-  if (combinedPosts.length > 0) {
-    return (
-      <Slider
-        totalPages={PostData.totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        items={combinedPosts}
-      />
-    );
+  if (!isLoading && PostData.length > 0) {
+    return <Slider items={PostData} />;
   } else {
     return (
       <NoPostWrapper>
